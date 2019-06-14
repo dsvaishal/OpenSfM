@@ -80,6 +80,7 @@ def match(args):
     matcher_type = config['matcher_type']
     robust_matching_min_match = config['robust_matching_min_match']
 
+    im1_initial_matches = {}
     im1_matches = {}
 
     for im2 in candidates:
@@ -104,8 +105,9 @@ def match(args):
         logger.debug('{} - {} has {} candidate matches'.format(
             im1, im2, len(matches)))
         if len(matches) < robust_matching_min_match:
-            im1_matches[im2] = []
+            im1_initial_matches[im2] = []
             continue
+        im1_initial_matches[im2] = matches
 
         # robust matching
         t_robust_matching = timer()
@@ -124,4 +126,7 @@ def match(args):
 
         logger.debug("Full matching {0} / {1}, time: {2}s".format(
             len(rmatches), len(matches), timer() - t))
+
+    if ctx.data.config['save_intial_matches']:
+        ctx.data.save_matches(im1, im1_initial_matches, 'intial_matches.pkl.gz')
     ctx.data.save_matches(im1, im1_matches)
